@@ -1,0 +1,104 @@
+2026-05-28 10:17:55,094 - INFO - Início do processamento
+2026-05-28 10:17:55,198 - INFO - Sucesso: GREEN_GUIA_GJA-SA_000002-25.pdf
+2026-05-28 10:17:55,198 - WARNING - Nome inválido: GREEN_GUIA_SPO-PA_00000-26.pdf
+2026-05-28 10:17:55,198 - INFO - Fim do processamento
+2026-05-28 10:17:55,393 - INFO - Total geral: 261.78
+2026-05-28 10:17:55,393 - INFO - Erros: 1
+2026-05-28 10:21:25,972 - INFO - Início do processamento
+2026-05-28 10:21:26,088 - INFO - Sucesso: GREEN_GUIA_GJA-SA_000002-25.pdf
+2026-05-28 10:21:26,211 - INFO - Sucesso: GREEN_GUIA_SPO-PA_000002-26.pdf
+2026-05-28 10:21:26,211 - INFO - Fim do processamento
+2026-05-28 10:21:26,412 - INFO - Total geral: 523.56
+2026-05-28 10:21:26,412 - INFO - Erros: 0
+2026-05-28 11:02:08,063 - INFO - Início do processamento
+2026-05-28 11:02:08,067 - WARNING - Nome inválido: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 11:02:08,067 - INFO - Fim do processamento
+2026-05-28 11:03:26,829 - INFO - Início do processamento
+2026-05-28 11:03:26,831 - WARNING - Nome inválido: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 11:03:26,832 - INFO - Fim do processamento
+2026-05-28 11:03:26,855 - INFO - Total geral: 0
+2026-05-28 11:03:26,855 - INFO - Erros: 1
+2026-05-28 11:11:36,074 - INFO - Início do processamento
+2026-05-28 11:11:36,076 - WARNING - Nome fora do padrão: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 11:11:36,224 - INFO - Sucesso: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 11:11:36,224 - INFO - Fim do processamento
+2026-05-28 11:11:36,236 - INFO - Total geral: 5501.92
+2026-05-28 11:11:36,236 - INFO - Erros: 0
+2026-05-28 13:58:25,806 - INFO - Início do processamento
+2026-05-28 13:58:25,807 - WARNING - Nome fora do padrão: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 13:58:25,977 - INFO - Sucesso: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 13:58:25,978 - INFO - Fim do processamento
+2026-05-28 13:58:26,359 - INFO - Total geral: 5501.92
+2026-05-28 13:58:26,359 - INFO - Erros: 0
+2026-05-28 13:59:38,922 - INFO - Início do processamento
+2026-05-28 13:59:38,923 - WARNING - Nome fora do padrão: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 13:59:39,080 - INFO - Sucesso: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 13:59:39,080 - WARNING - Nome fora do padrão: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 13:59:39,167 - INFO - Sucesso: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 13:59:39,167 - INFO - Fim do processamento
+2026-05-28 13:59:39,178 - INFO - Total geral: 8463.51
+2026-05-28 13:59:39,179 - INFO - Erros: 0
+2026-05-28 14:17:56,861 - INFO - Início do processamento
+2026-05-28 14:17:56,863 - WARNING - Nome fora do padrão: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 14:17:57,005 - INFO - Sucesso: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 14:17:57,005 - WARNING - Nome fora do padrão: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 14:17:57,109 - INFO - Sucesso: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 14:17:57,109 - INFO - Fim do processamento
+2026-05-28 14:17:57,119 - INFO - Total geral: 8463.51
+2026-05-28 14:17:57,119 - INFO - Erros: 0
+2026-05-28 14:21:44,313 - INFO - Início do processamento
+2026-05-28 14:21:44,315 - WARNING - Nome fora do padrão: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 14:21:44,496 - INFO - Sucesso: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 14:21:44,497 - WARNING - Nome fora do padrão: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 14:21:44,597 - INFO - Sucesso: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 14:21:44,597 - INFO - Fim do processamento
+2026-05-28 14:21:44,982 - INFO - Total geral: 8463.51
+2026-05-28 14:21:44,982 - INFO - Erros: 0
+2026-05-28 14:26:18,778 - INFO - Início do processamento
+2026-05-28 14:26:18,778 - WARNING - Nome fora do padrão: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 14:26:18,883 - INFO - Sucesso: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 14:26:18,884 - WARNING - Nome fora do padrão: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 14:26:19,072 - INFO - Sucesso: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 14:26:19,072 - INFO - Fim do processamento
+2026-05-28 14:26:19,090 - INFO - Total geral: 8463.51
+2026-05-28 14:26:19,090 - INFO - Erros: 0
+2026-05-28 14:31:14,859 - INFO - Início do processamento
+2026-05-28 14:31:14,860 - WARNING - Nome fora do padrão: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 14:31:15,003 - INFO - Sucesso: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 14:31:15,004 - WARNING - Nome fora do padrão: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 14:31:15,108 - INFO - Sucesso: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 14:31:15,108 - INFO - Fim do processamento
+2026-05-28 14:31:15,487 - INFO - Total geral: 8463.51
+2026-05-28 14:31:15,487 - INFO - Erros: 0
+2026-05-28 15:37:11,960 - INFO - Início do processamento
+2026-05-28 15:37:11,964 - WARNING - Nome fora do padrão: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 15:37:12,231 - INFO - Sucesso: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 15:37:12,231 - WARNING - Nome fora do padrão: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 15:37:12,505 - INFO - Sucesso: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 15:37:12,506 - INFO - Fim do processamento
+2026-05-28 15:37:12,527 - INFO - Total geral: 8463.51
+2026-05-28 15:37:12,527 - INFO - Erros: 0
+2026-05-28 16:20:46,595 - INFO - Início do processamento
+2026-05-28 16:20:46,597 - WARNING - Nome fora do padrão: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 16:20:47,052 - INFO - Sucesso: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 16:20:47,053 - WARNING - Nome fora do padrão: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 16:20:47,522 - INFO - Sucesso: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 16:20:47,523 - INFO - Fim do processamento
+2026-05-28 16:20:48,462 - INFO - Total geral: 8463.51
+2026-05-28 16:20:48,462 - INFO - Erros: 0
+2026-05-28 16:23:16,951 - INFO - Início do processamento
+2026-05-28 16:23:16,951 - WARNING - Nome fora do padrão: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 16:23:17,155 - INFO - Sucesso: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 16:23:17,155 - WARNING - Nome fora do padrão: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 16:23:17,381 - INFO - Sucesso: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 16:23:17,381 - INFO - Fim do processamento
+2026-05-28 16:23:17,402 - INFO - Total geral: 8463.51
+2026-05-28 16:23:17,402 - INFO - Erros: 0
+2026-05-28 16:24:10,913 - INFO - Início do processamento
+2026-05-28 16:24:10,914 - WARNING - Nome fora do padrão: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 16:24:11,086 - INFO - Sucesso: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 16:24:11,087 - WARNING - Nome fora do padrão: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 16:24:11,277 - INFO - Sucesso: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 16:24:11,277 - INFO - Fim do processamento
+2026-05-28 16:24:11,289 - INFO - Total geral: 8463.51
+2026-05-28 16:24:11,289 - INFO - Erros: 0
