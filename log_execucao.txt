@@ -102,3 +102,11 @@
 2026-05-28 16:24:11,277 - INFO - Fim do processamento
 2026-05-28 16:24:11,289 - INFO - Total geral: 8463.51
 2026-05-28 16:24:11,289 - INFO - Erros: 0
+2026-05-28 16:58:55,094 - INFO - Início do processamento
+2026-05-28 16:58:55,096 - WARNING - Nome fora do padrão: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 16:58:55,515 - INFO - Sucesso: GREEN_GUIA_GJA-SA_000002-25.pdf.pdf
+2026-05-28 16:58:55,515 - WARNING - Nome fora do padrão: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 16:58:56,048 - INFO - Sucesso: GREEN_GUIA_SPO-PA_0000022-25.pdf.pdf
+2026-05-28 16:58:56,048 - INFO - Fim do processamento
+2026-05-28 16:58:56,088 - INFO - Total geral: 8463.51
+2026-05-28 16:58:56,088 - INFO - Erros: 0
