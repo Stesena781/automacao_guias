@@ -1,14 +1,20 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import shutil
 import os
-from main import processar_guias, salvar_relatorio
+
+# ✅ IMPORT PROTEGIDO (NÃO QUEBRA O RENDER)
+try:
+    from main import processar_guias, salvar_relatorio
+except Exception as e:
+    print("Erro ao importar main:", e)
+    processar_guias = None
+    salvar_relatorio = None
 
 app = FastAPI()
 
-# ✅ LIBERA ACESSO DO REACT
+# ✅ LIBERA ACESSO DO FRONTEND
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,11 +26,21 @@ app.add_middleware(
 PASTA_UPLOAD = "guias_pdf"
 OUTPUT_FILE = "output/relatorio_guias.xlsx"
 
+# ✅ ROTA DE TESTE (IMPORTANTE PARA VALIDAR DEPLOY)
+@app.get("/")
+def home():
+    return {"status": "API rodando ✅"}
+
 # ================== UPLOAD ==================
 @app.post("/upload/")
 async def upload_files(files: list[UploadFile] = File(...)):
     try:
+        # ✅ verifica se processamento está disponível
+        if processar_guias is None:
+            return {"status": "erro", "message": "Processamento indisponível no momento"}
+
         os.makedirs(PASTA_UPLOAD, exist_ok=True)
+        os.makedirs("output", exist_ok=True)
 
         # limpa pasta
         for f in os.listdir(PASTA_UPLOAD):
@@ -56,11 +72,10 @@ async def upload_files(files: list[UploadFile] = File(...)):
 # ================== DOWNLOAD ==================
 @app.get("/download/")
 def download():
-    return FileResponse(
-        OUTPUT_FILE,
-        filename="relatorio_guias.xlsx",
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-
-# ================== SERVIR REACT ==================
-app.mount("/", StaticFiles(directory="frontend/build", html=True), name="static")
+    if os.path.exists(OUTPUT_FILE):
+        return FileResponse(
+            OUTPUT_FILE,
+            filename="relatorio_guias.xlsx",
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    return {"status": "erro", "message": "Arquivo não encontrado"}
