@@ -47,19 +47,16 @@ async def upload_files(files: list[UploadFile] = File(...)):
         os.makedirs(PASTA_UPLOAD, exist_ok=True)
         os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-        # limpa pasta
         for f in os.listdir(PASTA_UPLOAD):
             caminho = os.path.join(PASTA_UPLOAD, f)
             if os.path.isfile(caminho):
                 os.remove(caminho)
 
-        # salva arquivos enviados
         for file in files:
             caminho = os.path.join(PASTA_UPLOAD, file.filename)
             with open(caminho, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
 
-        # processa
         resultados, erros = processar_guias()
         salvar_relatorio(resultados, erros)
 
@@ -67,7 +64,8 @@ async def upload_files(files: list[UploadFile] = File(...)):
             "status": "ok",
             "message": "Processamento concluído",
             "total_processados": len(resultados),
-            "total_erros": len(erros)
+            "total_erros": len(erros
+            )
         }
 
     except Exception as e:
@@ -92,8 +90,13 @@ def download():
         "message": "Relatório ainda não foi gerado"
     }
 
-# ================= FRONTEND (REACT) =================
+# ================= FRONTEND (CORRIGIDO) =================
 if FRONTEND_DIR.exists():
-    app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="static")
+    app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIR / "static")), name="assets")
+
+    @app.get("/")
+    def serve_react():
+        return FileResponse(str(FRONTEND_DIR / "index.html"))
+
 else:
     print("Build do frontend não encontrado:", FRONTEND_DIR)
