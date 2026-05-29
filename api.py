@@ -1,10 +1,11 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 import shutil
 import os
 
-# ✅ IMPORT PROTEGIDO (NÃO QUEBRA O RENDER)
+# ================= IMPORT PROCESSAMENTO =================
 try:
     from main import processar_guias, salvar_relatorio
 except Exception as e:
@@ -12,9 +13,10 @@ except Exception as e:
     processar_guias = None
     salvar_relatorio = None
 
+# ================= APP =================
 app = FastAPI()
 
-# ✅ LIBERA ACESSO DO FRONTEND
+# ✅ CORS (libera React)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,28 +25,29 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ================= CONFIG =================
 PASTA_UPLOAD = "guias_pdf"
-OUTPUT_FILE = "output/relatorio_guias.xlsx"
+OUTPUT_DIR = "output"
+OUTPUT_FILE = os.path.join(OUTPUT_DIR, "relatorio_guias.xlsx")
 
-# ✅ ROTA DE TESTE (IMPORTANTE PARA VALIDAR DEPLOY)
-@app.get("/")
-def home():
-    return {"status": "API rodando ✅"}
-
-# ================== UPLOAD ==================
+# ================= UPLOAD =================
 @app.post("/upload/")
 async def upload_files(files: list[UploadFile] = File(...)):
     try:
-        # ✅ verifica se processamento está disponível
-        if processar_guias is None:
-            return {"status": "erro", "message": "Processamento indisponível no momento"}
+        if processar_guias is None or salvar_relatorio is None:
+            return {
+                "status": "erro",
+                "message": "Módulo de processamento indisponível"
+            }
 
         os.makedirs(PASTA_UPLOAD, exist_ok=True)
-        os.makedirs("output", exist_ok=True)
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
 
         # limpa pasta
         for f in os.listdir(PASTA_UPLOAD):
-            os.remove(os.path.join(PASTA_UPLOAD, f))
+            caminho = os.path.join(PASTA_UPLOAD, f)
+            if os.path.isfile(caminho):
+                os.remove(caminho)
 
         # salva arquivos enviados
         for file in files:
@@ -58,18 +61,19 @@ async def upload_files(files: list[UploadFile] = File(...)):
 
         return {
             "status": "ok",
-            "message": "Processado com sucesso",
+            "message": "Processamento concluído",
             "total_processados": len(resultados),
-            "erros": len(erros)
+            "total_erros": len(erros)
         }
 
     except Exception as e:
+        print("Erro no upload:", e)
         return {
             "status": "erro",
             "message": str(e)
         }
 
-# ================== DOWNLOAD ==================
+# ================= DOWNLOAD =================
 @app.get("/download/")
 def download():
     if os.path.exists(OUTPUT_FILE):
@@ -78,4 +82,11 @@ def download():
             filename="relatorio_guias.xlsx",
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-    return {"status": "erro", "message": "Arquivo não encontrado"}
+
+    return {
+        "status": "erro",
+        "message": "Relatório ainda não foi gerado"
+    }
+
+# ================= FRONTEND (REACT) =================
+app.mount("/", StaticFiles(directory="frontend/build", html=True), name="static")
