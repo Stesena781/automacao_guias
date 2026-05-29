@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 import shutil
 import os
 
@@ -26,6 +27,9 @@ app.add_middleware(
 )
 
 # ================= CONFIG =================
+BASE_DIR = Path(__file__).resolve().parent
+FRONTEND_DIR = BASE_DIR / "frontend" / "build"
+
 PASTA_UPLOAD = "guias_pdf"
 OUTPUT_DIR = "output"
 OUTPUT_FILE = os.path.join(OUTPUT_DIR, "relatorio_guias.xlsx")
@@ -89,4 +93,7 @@ def download():
     }
 
 # ================= FRONTEND (REACT) =================
-app.mount("/", StaticFiles(directory="frontend/build", html=True), name="static")
+if FRONTEND_DIR.exists():
+    app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="static")
+else:
+    print("Build do frontend não encontrado:", FRONTEND_DIR)
