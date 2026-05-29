@@ -1,0 +1,77 @@
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 60px 120px;
+  position: relative;
+  overflow: hidden; /* importante para o mascote expandir */
+}
+
+/* TEXTO ESQUERDA */
+.hero-left {
+  max-width: 600px;
+  z-index: 2; /* garante que fique na frente da imagem */
+}
+
+/* TAG VERDE */
+.tag {
+  background: #dff5e2;
+  color: #2e7d32;
+
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+
+  display: inline-block;
+}
+
+/* TÍTULO */
+.hero h1 {
+  font-size: 48px;
+  margin: 20px 0;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+/* TEXTO */
+.hero p {
+  color: #555;
+  font-size: 16px;
+  margin-bottom: 18px;
+}
+
+/* BENEFÍCIOS */
+.benefits {
+  display: flex;
+  gap: 25px;
+  margin-top: 20px;
+
+  font-size: 15px;
+  color: #333;
+}
+
+/* CONTAINER DO MASCOTE */
+.hero-right {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  pointer-events: none;
+
+  transform: translateY(60px); /* 🔥 DESCE O MASCOTE */
+}
+
+/* IMAGEM GRANDE */
+.hero-right img {
+  height: 130%;
+  max-width: none;
+
+  transform: translate(15%, 0) scale(1.15); /* mantém posição lateral */
+
+  opacity: 0.95;
+
+  filter: drop-shadow(0px 20px 30px rgba(0, 0, 0, 0.2));
+}

@@ -1,0 +1,45 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 20px 40px;
+  background: white;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.logo img {
+  width: 120px;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  color: #555;
+}
+
+.help {
+  cursor: pointer;
+}
+
+.user-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-circle {
+  width: 35px;
+  height: 35px;
+
+  border-radius: 50%;
+  background: #6a1b9a;
+
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: bold;
+}

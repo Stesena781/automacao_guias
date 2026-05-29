@@ -1,0 +1,26 @@
+/* IMPORTANTE: fonte moderna */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* BODY */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f5f5f7;
+  color: #1c1c1e;
+}
+
+/* LINKS */
+a {
+  text-decoration: none;
+}
+
+/* BOTÕES PADRÃO */
+button {
+  cursor: pointer;
+}

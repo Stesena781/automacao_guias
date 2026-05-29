@@ -47,19 +47,16 @@ async def upload_files(files: list[UploadFile] = File(...)):
         os.makedirs(PASTA_UPLOAD, exist_ok=True)
         os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-        # limpa pasta
         for f in os.listdir(PASTA_UPLOAD):
             caminho = os.path.join(PASTA_UPLOAD, f)
             if os.path.isfile(caminho):
                 os.remove(caminho)
 
-        # salva arquivos
         for file in files:
             caminho = os.path.join(PASTA_UPLOAD, file.filename)
             with open(caminho, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
 
-        # processa
         resultados, erros = processar_guias()
         salvar_relatorio(resultados, erros)
 
@@ -92,15 +89,24 @@ def download():
         "message": "Relatório ainda não foi gerado"
     }
 
-# ================= FRONTEND (CORRETO DEFINITIVO) =================
+# ================= FRONTEND FINAL (FUNCIONA MESMO) =================
 if FRONTEND_DIR.exists():
 
-    # arquivos estáticos do React (js, css)
-    app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR / "static")), name="static")
+    # arquivos JS e CSS do React
+    app.mount(
+        "/static",
+        StaticFiles(directory=str(FRONTEND_DIR / "static")),
+        name="static"
+    )
 
-    # rota raiz abre o React
-    @app.get("/")
-    def serve_react():
+    # rota PRINCIPAL
+    @app.get("/", include_in_schema=False)
+    def serve_root():
+        return FileResponse(str(FRONTEND_DIR / "index.html"))
+
+    # pega QUALQUER rota (corrige Not Found)
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def serve_react(full_path: str):
         return FileResponse(str(FRONTEND_DIR / "index.html"))
 
 else:
