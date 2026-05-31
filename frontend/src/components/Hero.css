@@ -5,16 +5,16 @@
 
   padding: 60px 120px;
   position: relative;
-  overflow: hidden; /* importante para o mascote expandir */
+  overflow: hidden;
 }
 
 /* TEXTO ESQUERDA */
 .hero-left {
   max-width: 600px;
-  z-index: 2; /* garante que fique na frente da imagem */
+  z-index: 2;
 }
 
-/* TAG VERDE */
+/* TAG */
 .tag {
   background: #dff5e2;
   color: #2e7d32;
@@ -51,25 +51,27 @@
   color: #333;
 }
 
-/* CONTAINER DO MASCOTE */
+/* MASCOTE */
 .hero-right {
   position: absolute;
   right: 0;
   bottom: 0;
   height: 100%;
+
   display: flex;
   align-items: flex-end;
+
   pointer-events: none;
 
-  transform: translateY(60px); /* 🔥 DESCE O MASCOTE */
+  transform: translateY(60px);
 }
 
-/* IMAGEM GRANDE */
+/* IMAGEM */
 .hero-right img {
   height: 130%;
   max-width: none;
 
-  transform: translate(15%, 0) scale(1.15); /* mantém posição lateral */
+  transform: translate(15%, 0) scale(1.15);
 
   opacity: 0.95;
 

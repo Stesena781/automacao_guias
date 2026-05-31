@@ -5,12 +5,14 @@ export default function UploadBox() {
   const [arquivos, setArquivos] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // selecionar arquivos
   const handleFiles = (e) => {
     setArquivos(Array.from(e.target.files));
   };
 
-  // enviar arquivos (VERSÃO CORRIGIDA)
+  const limparArquivos = () => {
+    setArquivos([]);
+  };
+
   const enviarArquivos = async () => {
     const formData = new FormData();
 
@@ -21,14 +23,14 @@ export default function UploadBox() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/upload/", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "https://automacao-guias.onrender.com/upload/",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
-      console.log("Status RESPONSE:", response.status);
-
-      // ✅ usa status HTTP (não quebra mais)
       if (response.status === 200) {
         alert("✅ Processamento concluído com sucesso!");
       } else {
@@ -36,16 +38,15 @@ export default function UploadBox() {
       }
 
     } catch (erro) {
-      console.error("Erro ao enviar:", erro);
+      console.error("Erro:", erro);
       alert("❌ Falha de conexão com o servidor");
     }
 
     setLoading(false);
   };
 
-  // baixar relatório
   const baixarRelatorio = () => {
-    window.open("http://127.0.0.1:8000/download/");
+    window.open("https://automacao-guias.onrender.com/download/");
   };
 
   return (
@@ -54,12 +55,11 @@ export default function UploadBox() {
       <h2>📥 Upload de arquivos</h2>
 
       <p>
-        Selecione os arquivos PDF para iniciar a leitura automática
+        Selecione os arquivos PDF para iniciar o processamento
       </p>
 
       <div className="upload-box">
 
-        {/* INPUT OCULTO */}
         <input
           type="file"
           multiple
@@ -69,16 +69,14 @@ export default function UploadBox() {
           onChange={handleFiles}
         />
 
-        {/* BOTÃO DE SELEÇÃO */}
         <label htmlFor="fileInput" className="upload-button">
           Selecionar arquivos
         </label>
 
         <span className="info">
-          200MB por arquivo • Formato PDF
+          200MB por arquivo • PDF
         </span>
 
-        {/* LISTA DE ARQUIVOS */}
         {arquivos.length > 0 && (
           <div className="file-list">
 
@@ -86,7 +84,6 @@ export default function UploadBox() {
               <div key={index}>📄 {file.name}</div>
             ))}
 
-            {/* BOTÃO PROCESSAR */}
             <button
               className="upload-button"
               onClick={enviarArquivos}
@@ -95,7 +92,13 @@ export default function UploadBox() {
               {loading ? "⏳ Processando..." : "🚀 Processar"}
             </button>
 
-            {/* BOTÃO BAIXAR */}
+            <button
+              className="clear-button"
+              onClick={limparArquivos}
+            >
+              🗑️ Limpar arquivos
+            </button>
+
             <button
               className="download-button"
               onClick={baixarRelatorio}

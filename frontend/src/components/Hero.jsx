@@ -1,14 +1,14 @@
 import "./Hero.css";
+import mascote from "../assets/mascote.png";
 
 export default function Hero() {
   return (
     <div className="hero">
 
+      {/* TEXTO ESQUERDA */}
       <div className="hero-left">
 
-        <span className="tag">
-          🌿 DESMOBILIZAÇÃO DE SITES
-        </span>
+        <span className="tag">🌿 DESMOBILIZAÇÃO DE SITES</span>
 
         <h1>
           Sistema automático <br />
@@ -16,21 +16,21 @@ export default function Hero() {
         </h1>
 
         <p>
-          Faça upload das suas guias em PDF e extraia os dados
-          de forma rápida, segura e automatizada.
+          Faça upload das suas guias em PDF e extraia os dados de forma rápida,
+          segura e automatizada.
         </p>
 
         <div className="benefits">
-          <div>⚡ Mais agilidade</div>
-          <div>🔐 Mais segurança</div>
-          <div>🌱 Mais sustentabilidade</div>
+          <span>⚡ Mais agilidade</span>
+          <span>🔐 Mais segurança</span>
+          <span>🌱 Mais sustentabilidade</span>
         </div>
 
       </div>
 
-      {/* 👉 MASCOTE AQUI */}
+      {/* MASCOTE DIREITA */}
       <div className="hero-right">
-        <img src="/mascote.png" alt="mascote" />
+        <img src={mascote} alt="mascote" />
       </div>
 
     </div>

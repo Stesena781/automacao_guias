@@ -25,9 +25,15 @@
   flex-direction: column;
   align-items: center;
   gap: 15px;
+
+  transition: 0.3s;
 }
 
-/* BOTÃO */
+.upload-box:hover {
+  border-color: #4a148c;
+}
+
+/* BOTÃO PRINCIPAL */
 .upload-button {
   background: #6a1b9a;
   color: white;
@@ -40,10 +46,46 @@
   font-weight: 500;
 
   cursor: pointer;
+  transition: 0.3s;
 }
 
 .upload-button:hover {
   background: #4a148c;
+}
+
+/* BOTÃO LIMPAR */
+.clear-button {
+  background: #d3d3d3;
+  color: #333;
+
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.clear-button:hover {
+  background: #bdbdbd;
+}
+
+/* BOTÃO DOWNLOAD */
+.download-button {
+  background: #444;
+  color: white;
+
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+
+  margin-top: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.download-button:hover {
+  background: #222;
 }
 
 /* TEXTO INFERIOR */
@@ -51,21 +93,21 @@
   font-size: 12px;
   color: #888;
 }
+
+/* LISTA DE ARQUIVOS */
 .file-list {
   margin-top: 15px;
   font-size: 14px;
   color: #444;
-}
-.download-button {
-  background: #444;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  margin-top: 10px;
-  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.download-button:hover {
-  background: #222;
+/* ITENS DA LISTA */
+.file-list div {
+  background: #eeeeee;
+  padding: 6px 10px;
+  border-radius: 6px;
 }
