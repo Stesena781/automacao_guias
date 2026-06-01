@@ -16,56 +16,63 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-# ================= VALIDAR NOME (FLEXÍVEL ✅) =================
+# ================= VALIDAR NOME =================
 def validar_nome(nome):
-    # aceita variação de site e número
     padrao = r'_GUIA_.*_\d+-\d{2}\.pdf$'
     return bool(re.search(padrao, nome))
 
 
 # ================= EXTRAÇÃO DE TEXTO =================
 def extrair_texto_pdf(caminho):
-    reader = PdfReader(caminho)
-    texto = ""
+    try:
+        reader = PdfReader(caminho)
+        texto = ""
 
-    for pagina in reader.pages:
-        conteudo = pagina.extract_text()
-        if conteudo:
-            texto += conteudo + "\n"
+        for pagina in reader.pages:
+            conteudo = pagina.extract_text()
+            if conteudo:
+                texto += conteudo + "\n"
 
-    return texto
+        return texto
+
+    except Exception as e:
+        logging.error(f"Erro ao ler PDF {caminho}: {e}")
+        return ""
 
 
 # ================= NUMERO DA GUIA =================
 def extrair_numero_guia(nome_arquivo):
-    match = re.search(r'\d+-\d{2}', nome_arquivo)
+    match = re.search(r'\d{6,}-\d{2}', nome_arquivo)
     return match.group() if match else "Não encontrado"
 
 
-# ================= VALOR TOTAL =================
+# ================= VALOR TOTAL (ROBUSTO ✅) =================
 def extrair_valor_total(texto):
-    partes = texto.split("Valor Total")
+    valores = re.findall(r'\d{1,3}(?:\.\d{3})*,\d{2}', texto)
 
-    if len(partes) > 1:
-        antes = partes[0]
+    if not valores:
+        return None
 
-        valores = re.findall(r'\d{1,3}(?:\.\d{3})*,\d{2}', antes)
+    try:
+        valores_convertidos = [
+            float(v.replace('.', '').replace(',', '.'))
+            for v in valores
+        ]
 
-        if valores:
-            ultimo = valores[-1]
+        # pega o maior valor → geralmente é o total
+        return max(valores_convertidos)
 
-            return float(
-                ultimo.replace('.', '').replace(',', '.')
-            )
-
-    return None
+    except Exception as e:
+        logging.error(f"Erro ao converter valores: {e}")
+        return None
 
 
 # ================= LOCALIDADE =================
 def extrair_localidade(texto):
     match = re.search(
         r'LOCALIDADE DE ORIGEM\s*(.*?)\n',
-        texto
+        texto,
+        re.IGNORECASE
     )
 
     if match:
@@ -98,9 +105,8 @@ def processar_guias():
         if arquivo.lower().endswith(".pdf"):
 
             caminho = os.path.join(PASTA_PDFS, arquivo)
-            print(f"📄 Processando: {arquivo}")
+            print(f"\n📄 Processando: {arquivo}")
 
-            # ✅ valida, mas NÃO bloqueia
             if not validar_nome(arquivo):
                 logging.warning(f"Nome fora do padrão: {arquivo}")
 
@@ -108,21 +114,26 @@ def processar_guias():
                 texto = extrair_texto_pdf(caminho)
 
                 if not texto.strip():
-                    raise ValueError("PDF sem texto (scan)")
+                    logging.warning(f"PDF sem texto (scan?): {arquivo}")
 
                 numero_guia = extrair_numero_guia(arquivo)
                 total = extrair_valor_total(texto)
                 localidade = extrair_localidade(texto)
 
                 if total is None:
-                    raise ValueError("Valor total não encontrado")
+                    logging.warning(f"Valor não encontrado: {arquivo}")
+                    total = 0
+
+                print(f"→ Número: {numero_guia}")
+                print(f"→ Localidade: {localidade}")
+                print(f"→ Valor: {total}")
 
                 resultados.append({
                     "Arquivo": arquivo,
                     "Número Guia": numero_guia,
                     "Localidade": localidade,
                     "Valor (R$)": total,
-                    "Status": "OK"
+                    "Status": "OK" if total > 0 else "Verificar"
                 })
 
                 logging.info(f"Sucesso: {arquivo}")
