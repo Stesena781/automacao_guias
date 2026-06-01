@@ -15,6 +15,9 @@ LOG_FILE = "log_execucao.txt"
 os.makedirs(TEMP_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+# ✅ variável global para guardar o último relatório
+ultimo_relatorio = None
+
 # ================= FASTAPI =================
 app = FastAPI()
 
@@ -80,7 +83,6 @@ def processar_arquivos(files):
 
             caminho_temp = os.path.join(TEMP_DIR, file.filename)
 
-            # salva temporário
             with open(caminho_temp, "wb") as f:
                 f.write(file.file.read())
 
@@ -101,12 +103,10 @@ def processar_arquivos(files):
                 "Status": "OK" if total > 0 else "Verificar"
             })
 
-            # remove arquivo temporário ✅ (evita lixo)
             os.remove(caminho_temp)
 
         except Exception as e:
             logging.error(f"Erro em {file.filename}: {e}")
-
             erros.append({
                 "Arquivo": file.filename,
                 "Erro": str(e)
@@ -117,6 +117,8 @@ def processar_arquivos(files):
 
 # ================= RELATÓRIO =================
 def salvar_relatorio(resultados, erros):
+    global ultimo_relatorio
+
     caminho = os.path.join(OUTPUT_DIR, "relatorio_guias.xlsx")
 
     df = pd.DataFrame(resultados)
@@ -138,6 +140,9 @@ def salvar_relatorio(resultados, erros):
 
     print("✅ Relatório salvo em:", caminho)
 
+    # ✅ guarda o caminho em memória
+    ultimo_relatorio = caminho
+
     return caminho
 
 
@@ -145,6 +150,8 @@ def salvar_relatorio(resultados, erros):
 
 @app.post("/upload/")
 async def upload(files: list[UploadFile]):
+
+    global ultimo_relatorio
 
     if not files:
         return JSONResponse({"status": "erro", "message": "Nenhum arquivo enviado"})
@@ -161,15 +168,16 @@ async def upload(files: list[UploadFile]):
 
 @app.get("/download/")
 def download():
-    caminho = os.path.join(OUTPUT_DIR, "relatorio_guias.xlsx")
+    global ultimo_relatorio
 
-    if not os.path.exists(caminho):
-        return JSONResponse(
-            {"status": "erro", "message": "Relatório ainda não foi gerado"}
-        )
+    if not ultimo_relatorio or not os.path.exists(ultimo_relatorio):
+        return JSONResponse({
+            "status": "erro",
+            "message": "Relatório ainda não foi gerado"
+        })
 
     return FileResponse(
-        path=caminho,
+        ultimo_relatorio,
         filename="relatorio_guias.xlsx",
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
