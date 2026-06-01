@@ -4,14 +4,14 @@ import pandas as pd
 from PyPDF2 import PdfReader
 import logging
 from fastapi import FastAPI, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 # ================= CONFIG =================
 OUTPUT_DIR = "output"
 TEMP_DIR = "temp"
 LOG_FILE = "log_execucao.txt"
 
-# garante pasta temp e output
+# cria pastas
 os.makedirs(TEMP_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -25,13 +25,7 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-# ================= VALIDAR NOME =================
-def validar_nome(nome):
-    padrao = r'_GUIA_.*_\d+-\d{2}\.pdf$'
-    return bool(re.search(padrao, nome))
-
-
-# ================= EXTRAÇÃO DE TEXTO =================
+# ================= EXTRAÇÃO =================
 def extrair_texto_pdf(caminho):
     try:
         reader = PdfReader(caminho)
@@ -49,13 +43,11 @@ def extrair_texto_pdf(caminho):
         return ""
 
 
-# ================= NUMERO DA GUIA =================
 def extrair_numero_guia(nome_arquivo):
     match = re.search(r'\d{6,}-\d{2}', nome_arquivo)
     return match.group() if match else "Não encontrado"
 
 
-# ================= VALOR TOTAL =================
 def extrair_valor_total(texto):
     valores = re.findall(r'\d{1,3}(?:\.\d{3})*,\d{2}', texto)
 
@@ -67,29 +59,17 @@ def extrair_valor_total(texto):
             float(v.replace('.', '').replace(',', '.'))
             for v in valores
         ]
-
         return max(valores_convertidos)
-
-    except Exception as e:
-        logging.error(f"Erro ao converter valores: {e}")
+    except:
         return None
 
 
-# ================= LOCALIDADE =================
 def extrair_localidade(texto):
-    match = re.search(
-        r'LOCALIDADE DE ORIGEM\s*(.*?)\n',
-        texto,
-        re.IGNORECASE
-    )
-
-    if match:
-        return match.group(1).strip()
-
-    return "Não encontrado"
+    match = re.search(r'LOCALIDADE DE ORIGEM\s*(.*?)\n', texto, re.IGNORECASE)
+    return match.group(1).strip() if match else "Não encontrado"
 
 
-# ================= PROCESSAMENTO (UPLOAD ✅) =================
+# ================= PROCESSAMENTO =================
 def processar_arquivos(files):
     resultados = []
     erros = []
@@ -98,7 +78,7 @@ def processar_arquivos(files):
         try:
             print(f"\n📄 Processando: {file.filename}")
 
-            caminho_temp = f"{TEMP_DIR}/{file.filename}"
+            caminho_temp = os.path.join(TEMP_DIR, file.filename)
 
             # salva temporário
             with open(caminho_temp, "wb") as f:
@@ -106,19 +86,12 @@ def processar_arquivos(files):
 
             texto = extrair_texto_pdf(caminho_temp)
 
-            print(f"→ Tamanho do texto: {len(texto)}")
-
             numero_guia = extrair_numero_guia(file.filename)
             total = extrair_valor_total(texto)
             localidade = extrair_localidade(texto)
 
             if total is None:
-                logging.warning(f"Valor não encontrado: {file.filename}")
                 total = 0
-
-            print(f"→ Número: {numero_guia}")
-            print(f"→ Localidade: {localidade}")
-            print(f"→ Valor: {total}")
 
             resultados.append({
                 "Arquivo": file.filename,
@@ -128,9 +101,11 @@ def processar_arquivos(files):
                 "Status": "OK" if total > 0 else "Verificar"
             })
 
+            # remove arquivo temporário ✅ (evita lixo)
+            os.remove(caminho_temp)
+
         except Exception as e:
-            print(f"⚠️ Erro em {file.filename}: {e}")
-            logging.error(f"Erro: {file.filename} - {e}")
+            logging.error(f"Erro em {file.filename}: {e}")
 
             erros.append({
                 "Arquivo": file.filename,
@@ -142,6 +117,8 @@ def processar_arquivos(files):
 
 # ================= RELATÓRIO =================
 def salvar_relatorio(resultados, erros):
+    caminho = os.path.join(OUTPUT_DIR, "relatorio_guias.xlsx")
+
     df = pd.DataFrame(resultados)
     df_erros = pd.DataFrame(erros)
 
@@ -152,14 +129,14 @@ def salvar_relatorio(resultados, erros):
         "Valor": [len(df), total_geral, len(df_erros)]
     })
 
-    caminho = os.path.join(OUTPUT_DIR, "relatorio_guias.xlsx")
-
     with pd.ExcelWriter(caminho, engine="openpyxl") as writer:
         df.to_excel(writer, sheet_name="Dados", index=False)
         resumo.to_excel(writer, sheet_name="Resumo", index=False)
 
         if not df_erros.empty:
             df_erros.to_excel(writer, sheet_name="Erros", index=False)
+
+    print("✅ Relatório salvo em:", caminho)
 
     return caminho
 
@@ -169,14 +146,30 @@ def salvar_relatorio(resultados, erros):
 @app.post("/upload/")
 async def upload(files: list[UploadFile]):
 
+    if not files:
+        return JSONResponse({"status": "erro", "message": "Nenhum arquivo enviado"})
+
     resultados, erros = processar_arquivos(files)
 
     caminho = salvar_relatorio(resultados, erros)
 
-    return {"mensagem": "Processamento concluído"}
+    if not os.path.exists(caminho):
+        return JSONResponse({"status": "erro", "message": "Erro ao gerar relatório"})
+
+    return {"status": "ok", "mensagem": "Processamento concluído"}
 
 
 @app.get("/download/")
 def download():
     caminho = os.path.join(OUTPUT_DIR, "relatorio_guias.xlsx")
-    return FileResponse(caminho, filename="relatorio_guias.xlsx")
+
+    if not os.path.exists(caminho):
+        return JSONResponse(
+            {"status": "erro", "message": "Relatório ainda não foi gerado"}
+        )
+
+    return FileResponse(
+        path=caminho,
+        filename="relatorio_guias.xlsx",
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
