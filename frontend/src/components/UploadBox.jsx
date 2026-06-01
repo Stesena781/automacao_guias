@@ -13,6 +13,7 @@ export default function UploadBox() {
     setArquivos([]);
   };
 
+  // ✅ FUNÇÃO CORRIGIDA
   const enviarArquivos = async () => {
     const formData = new FormData();
 
@@ -31,22 +32,26 @@ export default function UploadBox() {
         }
       );
 
-      if (response.status === 200) {
-        alert("✅ Processamento concluído com sucesso!");
-      } else {
-        alert("⚠️ Processado, mas com retorno inesperado");
-      }
+      // ✅ RECEBE O ARQUIVO EXCEL
+      const blob = await response.blob();
+
+      // ✅ CRIA DOWNLOAD AUTOMÁTICO
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "relatorio_guias.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      alert("✅ Processamento concluído e download iniciado!");
 
     } catch (erro) {
       console.error("Erro:", erro);
-      alert("❌ Falha de conexão com o servidor");
+      alert("❌ Falha no envio ou processamento");
     }
 
     setLoading(false);
-  };
-
-  const baixarRelatorio = () => {
-    window.open("https://automacao-guias.onrender.com/download/");
   };
 
   return (
@@ -97,13 +102,6 @@ export default function UploadBox() {
               onClick={limparArquivos}
             >
               🗑️ Limpar arquivos
-            </button>
-
-            <button
-              className="download-button"
-              onClick={baixarRelatorio}
-            >
-              📥 Baixar relatório
             </button>
 
           </div>

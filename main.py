@@ -15,10 +15,6 @@ LOG_FILE = "log_execucao.txt"
 os.makedirs(TEMP_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# ✅ variável global para guardar o último relatório
-ultimo_relatorio = None
-
-# ================= FASTAPI =================
 app = FastAPI()
 
 # ================= LOG =================
@@ -40,7 +36,6 @@ def extrair_texto_pdf(caminho):
                 texto += conteudo + "\n"
 
         return texto
-
     except Exception as e:
         logging.error(f"Erro ao ler PDF {caminho}: {e}")
         return ""
@@ -103,6 +98,7 @@ def processar_arquivos(files):
                 "Status": "OK" if total > 0 else "Verificar"
             })
 
+            # apaga o arquivo temporário
             os.remove(caminho_temp)
 
         except Exception as e:
@@ -117,8 +113,6 @@ def processar_arquivos(files):
 
 # ================= RELATÓRIO =================
 def salvar_relatorio(resultados, erros):
-    global ultimo_relatorio
-
     caminho = os.path.join(OUTPUT_DIR, "relatorio_guias.xlsx")
 
     df = pd.DataFrame(resultados)
@@ -138,46 +132,34 @@ def salvar_relatorio(resultados, erros):
         if not df_erros.empty:
             df_erros.to_excel(writer, sheet_name="Erros", index=False)
 
-    print("✅ Relatório salvo em:", caminho)
-
-    # ✅ guarda o caminho em memória
-    ultimo_relatorio = caminho
+    print("✅ Relatório gerado com sucesso")
 
     return caminho
 
 
-# ================= ROTAS =================
-
+# ================= ROTA PRINCIPAL =================
 @app.post("/upload/")
 async def upload(files: list[UploadFile]):
 
-    global ultimo_relatorio
-
     if not files:
-        return JSONResponse({"status": "erro", "message": "Nenhum arquivo enviado"})
+        return JSONResponse({
+            "status": "erro",
+            "message": "Nenhum arquivo enviado"
+        })
 
     resultados, erros = processar_arquivos(files)
 
     caminho = salvar_relatorio(resultados, erros)
 
     if not os.path.exists(caminho):
-        return JSONResponse({"status": "erro", "message": "Erro ao gerar relatório"})
-
-    return {"status": "ok", "mensagem": "Processamento concluído"}
-
-
-@app.get("/download/")
-def download():
-    global ultimo_relatorio
-
-    if not ultimo_relatorio or not os.path.exists(ultimo_relatorio):
         return JSONResponse({
             "status": "erro",
-            "message": "Relatório ainda não foi gerado"
+            "message": "Erro ao gerar relatório"
         })
 
+    # ✅ ✅ ✅ RETORNA O EXCEL DIRETO
     return FileResponse(
-        ultimo_relatorio,
+        path=caminho,
         filename="relatorio_guias.xlsx",
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
