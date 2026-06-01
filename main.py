@@ -3,11 +3,20 @@ import re
 import pandas as pd
 from PyPDF2 import PdfReader
 import logging
+from fastapi import FastAPI, UploadFile
+from fastapi.responses import FileResponse
 
 # ================= CONFIG =================
-PASTA_PDFS = "guias_pdf"
 OUTPUT_DIR = "output"
+TEMP_DIR = "temp"
 LOG_FILE = "log_execucao.txt"
+
+# garante pasta temp e output
+os.makedirs(TEMP_DIR, exist_ok=True)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+# ================= FASTAPI =================
+app = FastAPI()
 
 # ================= LOG =================
 logging.basicConfig(
@@ -46,7 +55,7 @@ def extrair_numero_guia(nome_arquivo):
     return match.group() if match else "Não encontrado"
 
 
-# ================= VALOR TOTAL (ROBUSTO ✅) =================
+# ================= VALOR TOTAL =================
 def extrair_valor_total(texto):
     valores = re.findall(r'\d{1,3}(?:\.\d{3})*,\d{2}', texto)
 
@@ -59,7 +68,6 @@ def extrair_valor_total(texto):
             for v in valores
         ]
 
-        # pega o maior valor → geralmente é o total
         return max(valores_convertidos)
 
     except Exception as e:
@@ -81,81 +89,59 @@ def extrair_localidade(texto):
     return "Não encontrado"
 
 
-# ================= PROCESSAMENTO =================
-def processar_guias():
+# ================= PROCESSAMENTO (UPLOAD ✅) =================
+def processar_arquivos(files):
     resultados = []
     erros = []
 
-    print(f"📁 Lendo pasta: {PASTA_PDFS}")
-    logging.info("Início do processamento")
+    for file in files:
+        try:
+            print(f"\n📄 Processando: {file.filename}")
 
-    if not os.path.exists(PASTA_PDFS):
-        print("❌ Pasta de PDFs NÃO encontrada!")
-        logging.error("Pasta não encontrada")
-        return [], []
+            caminho_temp = f"{TEMP_DIR}/{file.filename}"
 
-    arquivos = sorted(os.listdir(PASTA_PDFS))
+            # salva temporário
+            with open(caminho_temp, "wb") as f:
+                f.write(file.file.read())
 
-    if not arquivos:
-        print("⚠️ Pasta vazia!")
-        logging.warning("Pasta vazia")
-        return [], []
+            texto = extrair_texto_pdf(caminho_temp)
 
-    for arquivo in arquivos:
-        if arquivo.lower().endswith(".pdf"):
+            print(f"→ Tamanho do texto: {len(texto)}")
 
-            caminho = os.path.join(PASTA_PDFS, arquivo)
-            print(f"\n📄 Processando: {arquivo}")
+            numero_guia = extrair_numero_guia(file.filename)
+            total = extrair_valor_total(texto)
+            localidade = extrair_localidade(texto)
 
-            if not validar_nome(arquivo):
-                logging.warning(f"Nome fora do padrão: {arquivo}")
+            if total is None:
+                logging.warning(f"Valor não encontrado: {file.filename}")
+                total = 0
 
-            try:
-                texto = extrair_texto_pdf(caminho)
+            print(f"→ Número: {numero_guia}")
+            print(f"→ Localidade: {localidade}")
+            print(f"→ Valor: {total}")
 
-                if not texto.strip():
-                    logging.warning(f"PDF sem texto (scan?): {arquivo}")
+            resultados.append({
+                "Arquivo": file.filename,
+                "Número Guia": numero_guia,
+                "Localidade": localidade,
+                "Valor (R$)": total,
+                "Status": "OK" if total > 0 else "Verificar"
+            })
 
-                numero_guia = extrair_numero_guia(arquivo)
-                total = extrair_valor_total(texto)
-                localidade = extrair_localidade(texto)
+        except Exception as e:
+            print(f"⚠️ Erro em {file.filename}: {e}")
+            logging.error(f"Erro: {file.filename} - {e}")
 
-                if total is None:
-                    logging.warning(f"Valor não encontrado: {arquivo}")
-                    total = 0
+            erros.append({
+                "Arquivo": file.filename,
+                "Erro": str(e)
+            })
 
-                print(f"→ Número: {numero_guia}")
-                print(f"→ Localidade: {localidade}")
-                print(f"→ Valor: {total}")
-
-                resultados.append({
-                    "Arquivo": arquivo,
-                    "Número Guia": numero_guia,
-                    "Localidade": localidade,
-                    "Valor (R$)": total,
-                    "Status": "OK" if total > 0 else "Verificar"
-                })
-
-                logging.info(f"Sucesso: {arquivo}")
-
-            except Exception as e:
-                print(f"⚠️ Erro em {arquivo}: {e}")
-                logging.error(f"Erro em {arquivo}: {e}")
-
-                erros.append({
-                    "Arquivo": arquivo,
-                    "Erro": str(e)
-                })
-
-    logging.info("Fim do processamento")
     return resultados, erros
 
 
 # ================= RELATÓRIO =================
 def salvar_relatorio(resultados, erros):
-    if not os.path.exists(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)
-
     df = pd.DataFrame(resultados)
     df_erros = pd.DataFrame(erros)
 
@@ -175,22 +161,22 @@ def salvar_relatorio(resultados, erros):
         if not df_erros.empty:
             df_erros.to_excel(writer, sheet_name="Erros", index=False)
 
-    print("\n✅ RELATÓRIO GERADO")
-    print(f"📁 Arquivo: {caminho}")
-    print(f"💰 TOTAL GERAL: R$ {total_geral:,.2f}")
-    print(f"⚠️ Erros: {len(df_erros)}")
-
-    logging.info(f"Total geral: {total_geral}")
-    logging.info(f"Erros: {len(df_erros)}")
+    return caminho
 
 
-# ================= EXECUÇÃO =================
-def main():
-    print("\n🚀 PROCESSANDO GUIAS...\n")
+# ================= ROTAS =================
 
-    resultados, erros = processar_guias()
-    salvar_relatorio(resultados, erros)
+@app.post("/upload/")
+async def upload(files: list[UploadFile]):
+
+    resultados, erros = processar_arquivos(files)
+
+    caminho = salvar_relatorio(resultados, erros)
+
+    return {"mensagem": "Processamento concluído"}
 
 
-if __name__ == "__main__":
-    main()
+@app.get("/download/")
+def download():
+    caminho = os.path.join(OUTPUT_DIR, "relatorio_guias.xlsx")
+    return FileResponse(caminho, filename="relatorio_guias.xlsx")
