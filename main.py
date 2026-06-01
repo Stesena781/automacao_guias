@@ -4,14 +4,14 @@ import pandas as pd
 from PyPDF2 import PdfReader
 import logging
 from fastapi import FastAPI, UploadFile
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
 
 # ================= CONFIG =================
 OUTPUT_DIR = "output"
 TEMP_DIR = "temp"
 LOG_FILE = "log_execucao.txt"
 
-# cria pastas
 os.makedirs(TEMP_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -74,7 +74,7 @@ def processar_arquivos(files):
 
     for file in files:
         try:
-            print(f"\n📄 Processando: {file.filename}")
+            print(f"📄 Processando: {file.filename}")
 
             caminho_temp = os.path.join(TEMP_DIR, file.filename)
 
@@ -98,7 +98,6 @@ def processar_arquivos(files):
                 "Status": "OK" if total > 0 else "Verificar"
             })
 
-            # apaga o arquivo temporário
             os.remove(caminho_temp)
 
         except Exception as e:
@@ -132,12 +131,10 @@ def salvar_relatorio(resultados, erros):
         if not df_erros.empty:
             df_erros.to_excel(writer, sheet_name="Erros", index=False)
 
-    print("✅ Relatório gerado com sucesso")
-
     return caminho
 
 
-# ================= ROTA PRINCIPAL =================
+# ================= API =================
 @app.post("/upload/")
 async def upload(files: list[UploadFile]):
 
@@ -157,9 +154,26 @@ async def upload(files: list[UploadFile]):
             "message": "Erro ao gerar relatório"
         })
 
-    # ✅ ✅ ✅ RETORNA O EXCEL DIRETO
+    # ✅ retorna o excel direto
     return FileResponse(
         path=caminho,
         filename="relatorio_guias.xlsx",
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+
+# ================= FRONTEND =================
+
+# arquivos estáticos (JS, CSS)
+app.mount("/static", StaticFiles(directory="frontend/build/static"), name="static")
+
+# página principal React
+@app.get("/")
+def serve_frontend():
+    index_path = "frontend/build/index.html"
+
+    if os.path.exists(index_path):
+        with open(index_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(f.read())
+
+    return {"erro": "Frontend não encontrado. Faça npm run build."}
