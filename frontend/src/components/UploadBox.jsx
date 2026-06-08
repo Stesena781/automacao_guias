@@ -25,7 +25,7 @@ export default function UploadBox() {
 
     try {
       const response = await fetch(
-        "https://automacao-guias.onrender.com/upload/",
+        "https://automacao-guias.onrender.com/upload",
         {
           method: "POST",
           body: formData,
