@@ -1,138 +1,92 @@
-import os
-import re
+import pdfplumber
 import pandas as pd
-from PyPDF2 import PdfReader
+import re
 from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-
-# ================= CONFIG =================
-TEMP_DIR = "temp"
-os.makedirs(TEMP_DIR, exist_ok=True)
+from fastapi.responses import StreamingResponse
+from typing import List
+import io
 
 app = FastAPI()
 
-# ✅ CORS (ESSENCIAL para frontend no Vercel)
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # pode restringir depois
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ================= EXTRAÇÃO =================
-
-def extrair_texto_pdf(caminho):
-    reader = PdfReader(caminho)
+# FUNÇÃO PARA EXTRAIR DADOS
+def extrair_dados_pdf(file_bytes):
     texto = ""
 
-    for pagina in reader.pages:
-        conteudo = pagina.extract_text()
-        if conteudo:
-            texto += conteudo + "\n"
+    with pdfplumber.open(io.BytesIO(file_bytes)) as pdf:
+        for page in pdf.pages:
+            txt = page.extract_text()
+            if txt:
+                texto += txt + "\n"
 
-    return texto
+    # LOCALIDADE
+    localidade = None
+    match_local = re.search(r'LOCALIDADE DE ORIGEM (.+)', texto)
+    if match_local:
+        localidade = match_local.group(1).strip()
 
-
-def extrair_numero_guia(nome_arquivo):
-    match = re.search(r'\d{6,}-\d{2}', nome_arquivo)
-    return match.group() if match else "Não encontrado"
-
-
-def extrair_localidade(texto):
-    match = re.search(
-        r'LOCALIDADE DE ORIGEM\s*(.*?)-\s*SP',
+    # DESCRIÇÃO
+    descricao = None
+    desc_match = re.search(
+        r'DESCRIÇÃO DO MATERIAL(.*?)(Valor Total|ÍTEM|$)',
         texto,
-        re.IGNORECASE
+        re.S
     )
+    if desc_match:
+        descricao = desc_match.group(1).strip()
 
-    if match:
-        return match.group(0).strip()
+    # PESO
+    pesos = re.findall(
+        r'(\d{1,3}(?:\.\d{3})*,\d{2})\s*(?=R\$)',
+        texto
+    )
+    peso = pesos[-1] if pesos else ""
 
-    return "Não encontrado"
+    # VALOR TOTAL
+    valores = re.findall(
+        r'R\$\s*(\d{1,3}(?:\.\d{3})*,\d{2})',
+        texto
+    )
+    valor_total = valores[-1] if valores else ""
 
+    return {
+        "Localidade": localidade,
+        "Descricao": descricao,
+        "Peso (kg)": peso,
+        "Valor Total": valor_total
+    }
 
-def extrair_valor_total(texto):
-    valores = re.findall(r'\d{1,3}(?:\.\d{3})*,\d{2}', texto)
-
-    if not valores:
-        return 0
-
-    valores_convertidos = [
-        float(v.replace('.', '').replace(',', '.'))
-        for v in valores
-    ]
-
-    return max(valores_convertidos)
-
-# ================= PROCESSAMENTO =================
-
-def processar_arquivos(files):
+# ENDPOINT
+@app.post("/upload")
+async def upload(files: List[UploadFile] = File(...)):
     resultados = []
 
     for file in files:
-        try:
-            print(f"📄 Processando: {file.filename}")
+        file_bytes = await file.read()
+        dados = extrair_dados_pdf(file_bytes)
+        resultados.append(dados)
 
-            caminho = os.path.join(TEMP_DIR, file.filename)
+    # cria dataframe
+    df = pd.DataFrame(resultados)
 
-            with open(caminho, "wb") as f:
-                f.write(file.file.read())
+    # gera excel em memória
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False)
 
-            texto = extrair_texto_pdf(caminho)
+    output.seek(0)
 
-            resultados.append({
-                "Arquivo": file.filename,
-                "Número Guia": extrair_numero_guia(file.filename),
-                "Localidade": extrair_localidade(texto),
-                "Valor (R$)": extrair_valor_total(texto)
-            })
-
-            os.remove(caminho)
-
-        except Exception as e:
-            resultados.append({
-                "Arquivo": file.filename,
-                "Erro": str(e)
-            })
-
-    return resultados
-
-# ================= RELATÓRIO =================
-
-def gerar_excel(dados):
-    caminho = "relatorio_guias.xlsx"
-
-    df = pd.DataFrame(dados)
-
-    total_geral = df["Valor (R$)"].sum() if "Valor (R$)" in df else 0
-
-    resumo = pd.DataFrame({
-        "Descrição": ["Total de Guias", "Total Geral (R$)"],
-        "Valor": [len(df), total_geral]
-    })
-
-    with pd.ExcelWriter(caminho, engine="openpyxl") as writer:
-        df.to_excel(writer, sheet_name="Dados", index=False)
-        resumo.to_excel(writer, sheet_name="Resumo", index=False)
-
-    return caminho
-
-# ================= API =================
-
-@app.post("/upload/")
-async def upload(files: list[UploadFile] = File(...)):
-
-    if not files:
-        return JSONResponse({"erro": "Nenhum arquivo enviado"})
-
-    dados = processar_arquivos(files)
-
-    caminho = gerar_excel(dados)
-
-    return FileResponse(
-        caminho,
-        filename="relatorio_guias.xlsx",
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=relatorio_guias.xlsx"}
     )
